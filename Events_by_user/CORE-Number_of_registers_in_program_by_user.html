@@ -47,14 +47,24 @@
             get: { method: "GET"}
         });
         }])
+            .factory("programStages", ['$resource', 'commonvariable', function ($resource, commonvariable) {
+                return $resource(commonvariable.url + "/programStages",
+                        {skipPaging:'true'},
+                        {
+                            get: { method: "GET"}
+                        });
+            }])
+
         .config(function ($translateProvider) {
            
   
         $translateProvider.translations('en', {
             SELECT: 'Select a program',
+            SELECT_STAGE: 'Select a program stage',
             TITTLE: 'Report of events by user',
             BUTTON_GENERATE: 'Generate',
             LABEL_PROGRAM: 'Program',
+            LABEL_PROGRAM_STAGE: 'Program Stage',
             LABEL_INITDATE: 'Start date',
             LABEL_ENDDATE: 'End date',
             LABEL_USER: 'User: ',
@@ -64,14 +74,18 @@
             LABEL_MESSAGEDETAIL: ", the report has not been generated",
             LABEL_MESSAGETITTLEGEN: 'Generating report!',
             LABEL_MESSAGEDETAILGEN: ', please wait while the report is generated',
-            LABEL_REGISTERACTIVE:' register without user(register still active)'
+            LABEL_REGISTERACTIVE:' register without user(register still active)',
+            LABEL_RUN:' Run',
+            LABEL_SHOWDETAILS: 'Show Details'
         });
 
         $translateProvider.translations('es', {
             SELECT: 'Seleccione un programa',
+            SELECT_STAGE: 'Seleccione una etapa de programa',
             TITTLE: ' Informe de eventos por usuario',
             BUTTON_GENERATE: 'Generar',
             LABEL_PROGRAM: 'Programa',
+            LABEL_PROGRAM_STAGE: 'Etapa del programa',
             LABEL_INITDATE: 'Fecha inicio',
             LABEL_ENDDATE: 'Fecha final',
             LABEL_USER: 'Usuario: ',
@@ -81,7 +95,9 @@
             LABEL_MESSAGEDETAIL: ', aun no se ha generado el informe',
             LABEL_MESSAGETITTLEGEN: 'Generando informe!',
             LABEL_MESSAGEDETAILGEN: ', Por favor espere mientras se genera el informe',
-            LABEL_REGISTERACTIVE: ' Registro sin usuario (registro aun activo)'
+            LABEL_REGISTERACTIVE: ' Registro sin usuario (registro aun activo)',
+            LABEL_RUN: ' Generar',
+            LABEL_SHOWDETAILS: ' Mostrar Detalles'
             
 
        });
@@ -108,7 +124,7 @@
        
 
     })
-        .controller('reportcontroller', ['$scope','programs', 'events', function ($scope, programs, events) {
+        .controller('reportcontroller', ['$scope','programs', 'events', 'programStages', function ($scope, programs, events,programStages) {
             $scope.generating = false;
             $scope.getPrograms = function () {
                 $scope.ListProgram = [];
@@ -118,12 +134,30 @@
                 });
             });
         }
+
+                $scope.getProgramStages = function () {
+                    $scope.ListProgramStages = [];
+                    programs.get().$promise.then(function (meProgramStages) {
+                        angular.forEach(meProgramStages.programS, function (value, key) {
+                            $scope.ListProgramStages.push({ id: value.id, name: value.displayName });
+                        });
+                    });
+                }
+
+
         $scope.getPrograms();
         $scope.selectProgram = function (prSelected) {
             $scope.ProgramId = prSelected.id;
             $scope.ProgramName = prSelected.name;
         }
-        
+    //Marko
+
+                $scope.getProgramStages();
+                $scope.selectProgramStages = function (stSelected) {
+                    $scope.ProgramStageId = stSelected.id;
+                    $scope.ProgramStageName = stSelected.name;
+                }
+
         $scope.Generate = function () {
             $scope.generating = true;
             var k = 0;
@@ -167,23 +201,20 @@
 
         }]);
 
-
-
-
 </script>
+
 <div ng-app="appHISPColombia">
     <div ng-controller="reportcontroller">
-        <div class="row">
-            <div class="col-md-4"> </div>
-            <div class="col-md-4">
+
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">{{'TITTLE' | translate}}</h3>
                     </div>
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-12">
+                        <form class="form-inline">
+
+                    <div class="form-group">
                                 <label>{{'LABEL_PROGRAM' | translate}}</label>
                                 <div class="dropdown">
                                     <button id="dLabel" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -196,38 +227,48 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                    </div>
+                        <div class="form-group">
+                                <label>{{'LABEL_PROGRAM_STAGE' | translate}}</label>
+                                <div class="dropdown">
+                                    <button id="dLabelPS" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {{ProgramStageName?ProgramStageName:'SELECT_STAGE' | translate}}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                        <li ng-repeat="data in ListProgramStages">
+                                            <a ng-click='selectProgramStage(data)'>{{data.name}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
                         </div>
-                            <div class="row">
-                                <div class="col-md-12">
+
+
+
+                        <div class="form-group">
                                     <label>{{'LABEL_INITDATE' | translate}}</label>
                                     <input type="date" ng-model="initDate" class="form-control" placeholder="YYYY-MM-DD" />
-                                </div>
-                            </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <label>{{'LABEL_ENDDATE' | translate}}</label>
-                                        <input type="date" ng-model="endDate" class="form-control" placeholder="YYYY-MM-DD" />
-                                    </div>
-                                </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <br />
-                                    </div>
-                                </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-default" ng-click="Generate()">Generar</button>
-                                </div>
-                            </div>
-
 
                         </div>
-                </div>
 
-            </div>
-            <div class="col-md-4"></div>
-        </div>
+                        <div class="form-group">
+                                        <label>{{'LABEL_ENDDATE' | translate}}</label>
+                                        <input type="date" ng-model="endDate" class="form-control" placeholder="YYYY-MM-DD" />
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                        <button type="button" class="btn btn-default" ng-click="Generate()">Generar</button>
+                        </div>
+                        <div class="form-group">
+                            
+                        <button type="button" class="btn btn-default" ng-click="Detalle()">Detalle</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
 
         <div class="row">
             <div class="col-md-12" >
@@ -268,6 +309,7 @@
             </div>
 
         </div>
-        
+
     </div>
 </div>
+
