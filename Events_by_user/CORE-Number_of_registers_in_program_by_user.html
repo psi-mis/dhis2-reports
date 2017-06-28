@@ -23,183 +23,236 @@
 
 <script type="text/javascript">
 
-   
+
     ////Principal module
     var appHISPColombia = angular.module("appHISPColombia", ['ngResource', 'ui.bootstrap', 'pascalprecht.translate'])
-        .factory("commonvariable", function () {
-        var Vari = {
-            url: "../api"
-        };
+            .factory("commonvariable", function () {
+                var Vari = {
+                    url: "../api"
+                };
 
-        return Vari;
-        })
-        .factory("programs", ['$resource', 'commonvariable', function ($resource, commonvariable) {
-        return $resource(commonvariable.url + "/programs",
-        { paging: 'false' },
-        {
-            get: { method: "GET"}
-        });
-        }])
-        .factory("events", ['$resource', 'commonvariable', function ($resource, commonvariable) {
-        return $resource(commonvariable.url + "/events",
-        {skipPaging:'true'},
-        {
-            get: { method: "GET"}
-        });
-        }])
-            .factory("programStages", ['$resource', 'commonvariable', function ($resource, commonvariable) {
-                return $resource(commonvariable.url + "/programStages",
+                return Vari;
+            })
+            .factory("programs", ['$resource', 'commonvariable', function ($resource, commonvariable) {
+                return $resource(commonvariable.url + "/programs",
+                        { paging: 'false' },
+                        {
+                            get: { method: "GET"}
+                        });
+            }])
+            .factory("events", ['$resource', 'commonvariable', function ($resource, commonvariable) {
+                return $resource(commonvariable.url + "/events",
                         {skipPaging:'true'},
                         {
                             get: { method: "GET"}
                         });
             }])
+            .factory("programStages", ['$resource', 'commonvariable', function ($resource, commonvariable) {
+                return $resource(commonvariable.url + "/programStages?"+  ":filter:id&skipPaging=true",
+                        {id:'@id',
+                            filter:"filter=program.id:eq:"},
+                        {
+                            get: { method: "GET"}
+                        });
+            }])
 
-        .config(function ($translateProvider) {
-           
-  
-        $translateProvider.translations('en', {
-            SELECT: 'Select a program',
-            SELECT_STAGE: 'Select a program stage',
-            TITTLE: 'Report of events by user',
-            BUTTON_GENERATE: 'Generate',
-            LABEL_PROGRAM: 'Program',
-            LABEL_PROGRAM_STAGE: 'Program Stage',
-            LABEL_INITDATE: 'Start date',
-            LABEL_ENDDATE: 'End date',
-            LABEL_USER: 'User: ',
-            LABEL_YEAR: 'Year: ',
-            LABEL_MONTH: 'Month: ',
-            LABEL_MESSAGETITTLE: 'Attention!',
-            LABEL_MESSAGEDETAIL: ", the report has not been generated",
-            LABEL_MESSAGETITTLEGEN: 'Generating report!',
-            LABEL_MESSAGEDETAILGEN: ', please wait while the report is generated',
-            LABEL_REGISTERACTIVE:' register without user(register still active)',
-            LABEL_RUN:' Run',
-            LABEL_SHOWDETAILS: 'Show Details'
-        });
+            .config(function ($translateProvider) {
 
-        $translateProvider.translations('es', {
-            SELECT: 'Seleccione un programa',
-            SELECT_STAGE: 'Seleccione una etapa de programa',
-            TITTLE: ' Informe de eventos por usuario',
-            BUTTON_GENERATE: 'Generar',
-            LABEL_PROGRAM: 'Programa',
-            LABEL_PROGRAM_STAGE: 'Etapa del programa',
-            LABEL_INITDATE: 'Fecha inicio',
-            LABEL_ENDDATE: 'Fecha final',
-            LABEL_USER: 'Usuario: ',
-            LABEL_YEAR: 'Año: ',
-            LABEL_MONTH: 'Mes: ',
-            LABEL_MESSAGETITTLE: 'Atención!',
-            LABEL_MESSAGEDETAIL: ', aun no se ha generado el informe',
-            LABEL_MESSAGETITTLEGEN: 'Generando informe!',
-            LABEL_MESSAGEDETAILGEN: ', Por favor espere mientras se genera el informe',
-            LABEL_REGISTERACTIVE: ' Registro sin usuario (registro aun activo)',
-            LABEL_RUN: ' Generar',
-            LABEL_SHOWDETAILS: ' Mostrar Detalles'
-            
 
-       });
-        $translateProvider.registerAvailableLanguageKeys(
-                  ['es', 'en'],
-                  {
-                      'en*': 'en',
-                      'es*': 'es',
-                      '*': 'en' // must be last!
-                  }
-              );
-        $translateProvider.fallbackLanguage(['en']);
-        jQuery.ajax({ url: '../api/userSettings/keyUiLocale/', contentType: 'text/plain', method: 'GET', dataType: 'text', async: false }).success(function (uiLocale) {
-            if (uiLocale == '') {
-                $translateProvider.determinePreferredLanguage();
-            }
-            else {
-                $translateProvider.use(uiLocale);
-            }
-        }).fail(function () {
-            $translateProvider.determinePreferredLanguage();
-        });
-       
-       
-
-    })
-        .controller('reportcontroller', ['$scope','programs', 'events', 'programStages', function ($scope, programs, events,programStages) {
-            $scope.generating = false;
-            $scope.getPrograms = function () {
-                $scope.ListProgram = [];
-            programs.get().$promise.then(function (mePrograms) {
-                angular.forEach(mePrograms.programs, function (value, key) {
-                    $scope.ListProgram.push({ id: value.id, name: value.displayName });
+                $translateProvider.translations('en', {
+                    SELECT: 'Select a program',
+                    SELECT_STAGE: 'Select a program stage',
+                    TITTLE: 'Report of events by user',
+                    BUTTON_GENERATE: 'Generate',
+                    LABEL_PROGRAM: 'Program',
+                    LABEL_PROGRAM_STAGE: 'Program Stage',
+                    LABEL_INITDATE: 'Start date',
+                    LABEL_ENDDATE: 'End date',
+                    LABEL_USER: 'User: ',
+                    LABEL_YEAR: 'Year: ',
+                    LABEL_MONTH: 'Month: ',
+                    LABEL_MESSAGETITTLE: 'Attention!',
+                    LABEL_MESSAGEDETAIL: ", the report has not been generated",
+                    LABEL_MESSAGETITTLEGEN: 'Generating report!',
+                    LABEL_MESSAGEDETAILGEN: ', please wait while the report is generated',
+                    LABEL_REGISTERACTIVE:' register without user(register still active)',
+                    LABEL_RUN:' Run',
+                    LABEL_SHOWDETAILS: 'Show Details',
+                    LABEL_TBL_USER: 'User',
+                    LABEL_TBL_EVENT_ID: 'Event ID ',
+                    LABEL_TBL_CREATED: 'Created ',
+                    LABEL_TBL_LAST_UPDATED: 'Last Updated ',
+                    LABEL_TBL_ORGUNIT: 'Organisation Unit ',
+                    LABEL_TBL_STATUS: 'Status',
+                    LABEL_TBL_EVENT: 'Event'
                 });
-            });
-        }
 
-                $scope.getProgramStages = function () {
+                $translateProvider.translations('es', {
+                    SELECT: 'Seleccione un programa',
+                    SELECT_STAGE: 'Seleccione una etapa de programa',
+                    TITTLE: ' Informe de eventos por usuario',
+                    BUTTON_GENERATE: 'Generar',
+                    LABEL_PROGRAM: 'Programa',
+                    LABEL_PROGRAM_STAGE: 'Etapa del programa',
+                    LABEL_INITDATE: 'Fecha inicio',
+                    LABEL_ENDDATE: 'Fecha final',
+                    LABEL_USER: 'Usuario: ',
+                    LABEL_YEAR: 'Año: ',
+                    LABEL_MONTH: 'Mes: ',
+                    LABEL_MESSAGETITTLE: 'Atención!',
+                    LABEL_MESSAGEDETAIL: ', aun no se ha generado el informe',
+                    LABEL_MESSAGETITTLEGEN: 'Generando informe!',
+                    LABEL_MESSAGEDETAILGEN: ', Por favor espere mientras se genera el informe',
+                    LABEL_REGISTERACTIVE: ' Registro sin usuario (registro aun activo)',
+                    LABEL_RUN: ' Generar',
+                    LABEL_SHOWDETAILS: ' Mostrar Detalles',
+                    LABEL_TBL_USER: 'Usuario',
+                    LABEL_TBL_EVENT_ID: 'Evento ',
+                    LABEL_TBL_CREATED: 'Fecha de Creación ',
+                    LABEL_TBL_LAST_UPDATED: 'Ultima actualización ',
+                    LABEL_TBL_ORGUNIT: 'Unidad Organizativa ',
+                    LABEL_TBL_STATUS: 'Estado',
+                    LABEL_TBL_EVENT: 'Evento'
+
+
+                });
+                $translateProvider.registerAvailableLanguageKeys(
+                        ['es', 'en'],
+                        {
+                            'en*': 'en',
+                            'es*': 'es',
+                            '*': 'en' // must be last!
+                        }
+                );
+                $translateProvider.fallbackLanguage(['en']);
+                jQuery.ajax({ url: '../api/userSettings/keyUiLocale/', contentType: 'text/plain', method: 'GET', dataType: 'text', async: false }).success(function (uiLocale) {
+                    if (uiLocale == '') {
+                        $translateProvider.determinePreferredLanguage();
+                    }
+                    else {
+                        $translateProvider.use(uiLocale);
+                    }
+                }).fail(function () {
+                    $translateProvider.determinePreferredLanguage();
+                });
+
+
+
+            })
+            .controller('reportcontroller', ['$scope','programs', 'events', 'programStages', function ($scope, programs, events,programStages) {
+                $scope.generating = false;
+                $scope.getPrograms = function () {
+                    $scope.ListProgram = [];
+                    programs.get().$promise.then(function (mePrograms) {
+                        angular.forEach(mePrograms.programs, function (value, key) {
+                            $scope.ListProgram.push({ id: value.id, name: value.displayName });
+                        });
+                    });
+                }
+                $scope.getProgramStages = function (programId) {
                     $scope.ListProgramStages = [];
-                    programs.get().$promise.then(function (meProgramStages) {
-                        angular.forEach(meProgramStages.programS, function (value, key) {
+                    programStages.get({id:programId}).$promise.then(function (meProgramStages) {
+                        angular.forEach(meProgramStages.programStages, function (value, key) {
                             $scope.ListProgramStages.push({ id: value.id, name: value.displayName });
                         });
                     });
                 }
 
 
-        $scope.getPrograms();
-        $scope.selectProgram = function (prSelected) {
-            $scope.ProgramId = prSelected.id;
-            $scope.ProgramName = prSelected.name;
-        }
-    //Marko
+                $scope.getPrograms();
+                $scope.selectProgram = function (prSelected) {
+                    $scope.ProgramId = prSelected.id;
+                    $scope.ProgramName = prSelected.name;
+                    $scope.getProgramStages(prSelected.id);
+                }
+                //Marko
 
-                $scope.getProgramStages();
+
+
                 $scope.selectProgramStages = function (stSelected) {
                     $scope.ProgramStageId = stSelected.id;
                     $scope.ProgramStageName = stSelected.name;
                 }
 
-        $scope.Generate = function () {
-            $scope.generating = true;
-            var k = 0;
-            $scope.agregateResults = {};
-            events.get({ program: $scope.ProgramId, startDate: $scope.initDate, endDate:$scope.endDate}).$promise.then(function (listEvents) {
-                angular.forEach(listEvents.events, function (event, ekey) {
-                    k++;
-                    try {
-                        var date = event.eventDate.split("-");
-                        var year = date[0];
-                        var month = date[1];
-                        var user =  event.storedBy?event.storedBy:event.dataValues[0].storedBy;
-                        if (user == undefined) {
-                            user = 'anonymous';
-                        }
-                            if ($scope.agregateResults[user]) {
-                                if ($scope.agregateResults[user][year]) {
-                                    if ($scope.agregateResults[user][year][month]){
-                                        $scope.agregateResults[user][year][month] = $scope.agregateResults[user][year][month] + 1;
+                $scope.Generate = function () {
+                    $scope.generating = true;
+                    var k = 0;
+                    $scope.agregateResults = {};
+                    $scope.detailResults={};
+                    $scope.created='';
+                    events.get({ program: $scope.ProgramId, programStage: $scope.ProgramStageId, startDate: $scope.initDate, endDate:$scope.endDate}).$promise.then(function (listEvents) {
+
+                        angular.forEach(listEvents.events, function (event, ekey) {
+                            k++;
+
+                            try {
+
+                                var date = event.eventDate.split("-");
+                                var year = date[0];
+                                var month = date[1];
+                                var user =  event.storedBy?event.storedBy:event.dataValues[0].storedBy;
+
+
+                                if (user == undefined) {
+                                    user = 'anonymous';
+                                }
+
+                                if ($scope.detailResults[user]){
+
+                                    if ($scope.detailResults[user][year]){
+                                        if ($scope.detailResults[user][year][month]){
+                                            $scope.detailResults[user][year][month].push(event);
                                         }
+                                        else{
+                                            $scope.detailResults[user][year][month]=[];
+                                            $scope.detailResults[user][year][month].push(event);
+                                        }
+                                    }else{
+                                        $scope.detailResults[user][year] = JSON.parse('{"' + month + '":[]}');
+                                        $scope.detailResults[user][year][month].push(event);
+                                    }
+                                }else{
+                                    $scope.detailResults[user]=JSON.parse('{"' + year + '":{"' + month + '":[]}}');
+                                    $scope.detailResults[user][year][month].push(event);
+
+                                }
+
+
+                                ///agregate information
+                                if ($scope.agregateResults[user]) {
+
+                                    if ($scope.agregateResults[user][year]) {
+
+                                        if ($scope.agregateResults[user][year][month]){
+                                            $scope.agregateResults[user][year][month] = $scope.agregateResults[user][year][month] + 1;
+                                        }
+                                        else {
+                                            //$scope.detailResults[user][year][month].push(event);
+                                            $scope.agregateResults[user][year][month]=1;
+                                            //$scope.created = event.created?event.created:event.dataValues[0].created;
+                                        }
+                                    }
                                     else {
-                                        $scope.agregateResults[user][year][month]=1;
-                                        }                                      
+
+                                        $scope.agregateResults[user][year] = JSON.parse('{"' + month + '":1}');
+                                    }
                                 }
                                 else {
-                                    $scope.agregateResults[user][year] = JSON.parse('{"' + month + '":1}');
+                                    $scope.agregateResults[user] = JSON.parse('{"' + year + '":{"' + month + '":1}}');
                                 }
+
+
                             }
-                            else {
-                                $scope.agregateResults[user] = JSON.parse('{"' + year + '":{"' + month + '":1}}');
-                             }
+                            catch (err) { };
 
-                        
-                    }
-                    catch (err) { };
-                    if (k >= listEvents.events.length)
-                        $scope.generating=false;
-                });
-            });
-        }
 
-        }]);
+                            if (k >= listEvents.events.length)
+                                $scope.generating=false;
+                        });
+                    });
+                }
+
+            }]);
 
 </script>
 
@@ -207,68 +260,73 @@
     <div ng-controller="reportcontroller">
 
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">{{'TITTLE' | translate}}</h3>
-                    </div>
-                    <div class="panel-body">
-                        <form class="form-inline">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{'TITTLE' | translate}}</h3>
+            </div>
+            <div class="panel-body">
+                <form class="form-inline">
 
                     <div class="form-group">
-                                <label>{{'LABEL_PROGRAM' | translate}}</label>
-                                <div class="dropdown">
-                                    <button id="dLabel" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {{ProgramName?ProgramName:'SELECT' | translate}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="dLabel">
-                                        <li ng-repeat="data in ListProgram">
-                                            <a ng-click='selectProgram(data)'>{{data.name}}</a>
-                                        </li>
-                                    </ul>
-                                </div>
+                        <label>{{'LABEL_PROGRAM' | translate}}</label>
+                        <div class="dropdown">
+                            <button id="dLabel" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ProgramName?ProgramName:'SELECT' | translate}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                <li ng-repeat="data in ListProgram">
+                                    <a ng-click='selectProgram(data)'>{{data.name}}</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                        <div class="form-group">
-                                <label>{{'LABEL_PROGRAM_STAGE' | translate}}</label>
-                                <div class="dropdown">
-                                    <button id="dLabelPS" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {{ProgramStageName?ProgramStageName:'SELECT_STAGE' | translate}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="dLabel">
-                                        <li ng-repeat="data in ListProgramStages">
-                                            <a ng-click='selectProgramStage(data)'>{{data.name}}</a>
-                                        </li>
-                                    </ul>
-                                </div>
+
+
+                    <div class="form-group">
+                        <label>{{'LABEL_PROGRAM_STAGE' | translate}}</label>
+                        <div class="dropdown">
+                            <button id="dLabelPS" type="button" class="btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ProgramStageName?ProgramStageName:'SELECT_STAGE' | translate}}
+                                <span class="caret"> </span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                <li ng-repeat="data in ListProgramStages">
+                                    <a ng-click='selectProgramStages(data)'>{{data.name}}</a>
+                                </li>
+                            </ul>
                         </div>
-
-
-
-                        <div class="form-group">
-                                    <label>{{'LABEL_INITDATE' | translate}}</label>
-                                    <input type="date" ng-model="initDate" class="form-control" placeholder="YYYY-MM-DD" />
-
-                        </div>
-
-                        <div class="form-group">
-                                        <label>{{'LABEL_ENDDATE' | translate}}</label>
-                                        <input type="date" ng-model="endDate" class="form-control" placeholder="YYYY-MM-DD" />
-                        </div>
-
-
-
-                        <div class="form-group">
-
-                        <button type="button" class="btn btn-default" ng-click="Generate()">Generar</button>
-                        </div>
-                        <div class="form-group">
-                            
-                        <button type="button" class="btn btn-default" ng-click="Detalle()">Detalle</button>
-                        </div>
-                        </form>
                     </div>
-                </div>
+
+
+
+
+                    <div class="form-group">
+                        <label>{{'LABEL_INITDATE' | translate}}</label>
+                        <input type="date" ng-model="initDate" class="form-control" placeholder="YYYY-MM-DD" />
+
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label>{{'LABEL_ENDDATE' | translate}}</label>
+                        <input type="date" ng-model="endDate" class="form-control" placeholder="YYYY-MM-DD" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>{{'BUTTON_GENERATE' | translate}}</label>
+                        <button type="button" class="btn btn-default center-block" ng-click="Generate()" >{{'BUTTON_GENERATE' | translate}}</button>
+                    </div>
+
+
+
+
+                </form>
+
+
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12" >
@@ -280,14 +338,14 @@
                 <div class="text-center" ng-show="generating">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <img src='../images/ajax-loader-circle.gif' /> <span></span> <strong> {{'LABEL_MESSAGETITTLEGEN' | translate}}</strong>{{'LABEL_MESSAGEDETAILGEN' | translate}}
-                        
+
                     </div>
                 </div>
-               <div class="row">
+                <div class="row">
                     <div class="col-md-12" ng-repeat="(user,years) in agregateResults">
                         <div class="well well-lg">
                             <h3> {{'LABEL_USER' | translate}} <span class="label label-primary">{{user!='anonymous'?user:'LABEL_REGISTERACTIVE' | translate}}</span></h3>
-                              <div class="panel panel-default" ng-repeat="(year,months) in years">
+                            <div class="panel panel-default" ng-repeat="(year,months) in years">
                                 <div class="panel-body">
                                     <h4><span class="label label-default">{{'LABEL_YEAR' | translate}} {{year}}</span></h4>
                                 </div>
@@ -296,8 +354,33 @@
                                         <li class="list-group-item" ng-repeat="(month,value) in months">
                                             <span class="badge">{{value}}</span>
                                             {{'LABEL_MONTH' | translate}} {{month}}
+                                            <div style="overflow-y: scroll;  height: 150px; width: 99%;">
+                                                <table class="table">
+                                                    <tr>
+
+                                                        <th>{{'LABEL_TBL_CREATED' | translate}}</th>
+
+                                                        <th>{{'LABEL_TBL_LAST_UPDATED' | translate}}</th>
+
+
+                                                        <th>{{'LABEL_TBL_ORGUNIT' | translate}}</th>
+
+
+                                                        <th>{{'LABEL_TBL_STATUS' | translate}}</th>
+
+                                                    </tr>
+                                                    <tr ng-repeat="data in detailResults[user][year][month] ">
+                                                        <td>{{data.created?data.created:data.dataValues[0].created}}</td>
+                                                        <td>{{data.lastUpdated?data.lastUpdated:data.dataValues[0].lastUpdated}}</td>
+                                                        <td>{{data.orgUnitName}}</td>
+                                                        <td>{{data.status}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
                                         </li>
                                     </ul>
+
+
 
                                 </div>
                             </div>
